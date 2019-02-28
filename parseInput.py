@@ -1,4 +1,4 @@
-from InputClass import photo
+from classes import photo
 filepath = 'input/a_example.txt'
 lines = open(filepath).readlines()
 i = 0
