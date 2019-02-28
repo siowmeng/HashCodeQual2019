@@ -6,12 +6,12 @@ Created on Fri Mar  1 02:39:06 2019
 @author: lowsiowmeng
 """
 
-from classes import slide, calcTransScores, getVCombi
+from classes import slide, calcTransScores, calcSlideshowScores, getVCombi
 from parseInputSM import input_parser
 from parseOutput import output_slideshow
 import numpy as np
 
-fname = 'd_pet_pictures'
+fname = 'c_memorable_moments'
 
 hPhotos, vPhotos = input_parser('./Problem/' + fname + '.txt')
 #hPhotos, vPhotos = input_parser('./Problem/a_example.txt')
@@ -107,8 +107,8 @@ while ((len(vSlidesCandidates) > 0) or (len(hSlidesCandidates) > 0)):
         hSlidesCandidates.pop(bestIdx - len(vSlidesBestTags))
         
     elif slideshow[-1].slideType == 'V':
-        print("Best Index", bestIdx)
-        print("Best Pair Index", vSlidesBestPairs[bestIdx])
+#        print("Best Index", bestIdx)
+#        print("Best Pair Index", vSlidesBestPairs[bestIdx])
         popIdxList = [bestIdx, vSlidesBestPairs[bestIdx]]
         
 #        allScores.pop(max(popIdxList))
@@ -128,4 +128,5 @@ while ((len(vSlidesCandidates) > 0) or (len(hSlidesCandidates) > 0)):
 
 output_slideshow('./' + fname + '.txt', slideshow)
 
+calcSlideshowScores(slideshow)
 

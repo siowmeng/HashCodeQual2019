@@ -6,7 +6,7 @@ Created on Fri Mar  1 02:39:06 2019
 @author: lowsiowmeng
 """
 
-from classes import slide, calcTransScores, getVCombi
+from classes import slide, calcTransScores, getVCombi2
 from parseInputSM import input_parser
 from parseOutput import output_slideshow
 import numpy as np
@@ -32,14 +32,14 @@ hPhotos, vPhotos = input_parser('./Problem/' + fname + '.txt')
 #        vSlidesBestTags[idx2] = len(currSlide.tags)
 #        vSlidesBestPairs[idx2] = idx1
 
-vSlidesCandidates, vSlidesBestTags, vSlidesBestPairs = getVCombi(vPhotos)
-
+vCandidates = getVCombi2(vPhotos)
+print("here")
 hSlidesCandidates = []
 for photo in hPhotos:
     hSlidesCandidates.append(slide('H', [photo]))
 
 hScores = [len(x.tags) for x in hSlidesCandidates]
-#vScores = vSlidesBestTags
+vScores = [len(x.tags) for x in vCandidates]
 
 slideshow = []
 
@@ -48,8 +48,8 @@ if len(hSlidesCandidates) > 0:
 else:
     maxHScore = -1
 
-if len(vSlidesCandidates) > 0:
-    maxVScore = max(vSlidesBestTags)
+if len(vCandidates) > 0:
+    maxVScore = max(vScores)
 else:
     maxVScore = -1
 
@@ -58,29 +58,17 @@ if maxHScore > maxVScore:
     slideshow.append(hSlidesCandidates.pop(popIdx))
     hScores.pop(popIdx)
 else:
-    popIdx = vSlidesBestTags.index(maxVScore)
-    popIdxList = [popIdx, vSlidesBestPairs[popIdx]]
+    popIdx = vScores.index(maxVScore)
     
-    slideshow.append(vSlidesCandidates.pop(max(popIdxList)))
-    vSlidesCandidates.pop(min(popIdxList))
-    
-    vSlidesBestTags.pop(max(popIdxList))
-    vSlidesBestTags.pop(min(popIdxList))
-    
-    vSlidesBestPairs.pop(max(popIdxList))
-    vSlidesBestPairs.pop(min(popIdxList))
-    
-    vPhotos.pop(max(popIdxList))
-    vPhotos.pop(min(popIdxList))
+    slideshow.append(vCandidates.pop(popIdx))
+    vScores.pop(popIdx)
 
-vSlidesCandidates, vSlidesBestTags, vSlidesBestPairs = getVCombi(vPhotos)
-
-while ((len(vSlidesCandidates) > 0) or (len(hSlidesCandidates) > 0)):
+while ((len(vCandidates) > 0) or (len(hSlidesCandidates) > 0)):
     
-    print(len(vSlidesCandidates) + len(hSlidesCandidates))
+    print(len(vCandidates) + len(hSlidesCandidates))
     
-    allCandidates = vSlidesCandidates + hSlidesCandidates
-    allScores = vSlidesBestTags + hScores
+    allCandidates = vCandidates + hSlidesCandidates
+    allScores = vScores + hScores
     
     allScores = np.array(allScores)
     
@@ -102,29 +90,14 @@ while ((len(vSlidesCandidates) > 0) or (len(hSlidesCandidates) > 0)):
     allScores = list(allScores)
     if slideshow[-1].slideType == 'H':
 #        allScores.pop(bestIdx)
-        hScores.pop(bestIdx - len(vSlidesBestTags))
+        hScores.pop(bestIdx - len(vCandidates))
 #        allCandidates.pop(bestIdx)
-        hSlidesCandidates.pop(bestIdx - len(vSlidesBestTags))
+        hSlidesCandidates.pop(bestIdx - len(vCandidates))
         
     elif slideshow[-1].slideType == 'V':
-        print("Best Index", bestIdx)
-        print("Best Pair Index", vSlidesBestPairs[bestIdx])
-        popIdxList = [bestIdx, vSlidesBestPairs[bestIdx]]
         
-#        allScores.pop(max(popIdxList))
-#        allScores.pop(min(popIdxList))
-#        
-#        allCandidates.pop(max(popIdxList))
-#        allCandidates.pop(min(popIdxList))
-#        
-#        vSlidesBestPairs.pop(max(popIdxList))
-#        vSlidesBestPairs.pop(min(popIdxList))
-        
-        vPhotos.pop(max(popIdxList))
-        vPhotos.pop(min(popIdxList))
-    
-    #vSlidesBestPairs
-    vSlidesCandidates, vSlidesBestTags, vSlidesBestPairs = getVCombi(vPhotos)
+        vScores.pop(bestIdx)
+        vCandidates.pop(bestIdx)
 
 output_slideshow('./' + fname + '.txt', slideshow)
 
