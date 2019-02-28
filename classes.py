@@ -17,7 +17,7 @@ class photo():
 # Output Class: List of Slides
 class slide():
     
-    def __init__(self, slideType, photos, tags):
+    def __init__(self, slideType, photos):
         
         self.slideType = slideType
         self.photos = photos
