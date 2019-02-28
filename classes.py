@@ -9,8 +9,9 @@ Created on Fri Mar  1 02:10:18 2019
 # Input Class: List of Photos
 class photo():
     
-    def __init__(self, orient, tags):
+    def __init__(self, photoID, orient, tags):
         
+        self.photoID = photoID
         self.orient = orient
         self.tags = tags
 
