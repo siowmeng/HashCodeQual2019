@@ -19,6 +19,7 @@ def input_parser(filepath):
             tags = []
             for j in range(tag_num):
                 tags.append(photo_info[2+j].rstrip())
-            photos.append(photo(orient=orientation,tags = tags))
+            photo_id = i - 1
+            photos.append(photo(photoID=photo_id,orient=orientation,tags = tags))
         i += 1
     return photos
