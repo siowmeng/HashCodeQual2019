@@ -27,4 +27,28 @@ class slide():
         for photo in self.photos:
             self.tags = self.tags.union(photo.tags)
 
+def calcTransScores(slide1, slide2):
+    
+    numCommon = len(slide1.tags.intersection(slide2.tags))
+    numDiff1 = len(slide1.tags.difference(slide2.tags))
+    numDiff2 = len(slide2.tags.difference(slide1.tags))
+    
+    return min(numCommon, numDiff1, numDiff2)
 
+def calcSlideshowScores(listSlides):
+    
+    prevSlide = None
+    currSlide = None
+    
+    totalScore = 0
+    for s in listSlides:
+        prevSlide = currSlide
+        currSlide = s
+        
+        if prevSlide == None:
+            continue
+        
+        totalScore += calcTransScores(prevSlide, currSlide)
+    
+    return totalScore
+    
