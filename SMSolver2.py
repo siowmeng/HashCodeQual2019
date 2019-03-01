@@ -6,99 +6,111 @@ Created on Fri Mar  1 02:39:06 2019
 @author: lowsiowmeng
 """
 
-from classes import slide, calcTransScores, getVCombi2
+from classes import slide, calcTransScores, calcSlideshowScores, getVCombi2
 from parseInputSM import input_parser
 from parseOutput import output_slideshow
 import numpy as np
 
-fname = 'd_pet_pictures'
+fname = 'b_lovely_landscapes'
 
 hPhotos, vPhotos = input_parser('./Problem/' + fname + '.txt')
-#hPhotos, vPhotos = input_parser('./Problem/a_example.txt')
-
-#vCombi = combinations(range(len(vPhotos)), 2)
-#    
-#vSlidesCandidates = [None] * len(vPhotos)
-#vSlidesBestTags = [0] * len(vPhotos)
-#vSlidesBestPairs = [-1] * len(vPhotos)
-#for idx1, idx2 in vCombi:
-#    currSlide = slide('V', [vPhotos[idx1], vPhotos[idx2]])
-#    if len(currSlide.tags) > vSlidesBestTags[idx1]:
-#        vSlidesCandidates[idx1] = currSlide
-#        vSlidesBestTags[idx1] = len(currSlide.tags)
-#        vSlidesBestPairs[idx1] = idx2
-#    if len(currSlide.tags) > vSlidesBestTags[idx2]:
-#        vSlidesCandidates[idx2] = currSlide
-#        vSlidesBestTags[idx2] = len(currSlide.tags)
-#        vSlidesBestPairs[idx2] = idx1
 
 vCandidates = getVCombi2(vPhotos)
-print("here")
-hSlidesCandidates = []
-for photo in hPhotos:
-    hSlidesCandidates.append(slide('H', [photo]))
 
-hScores = [len(x.tags) for x in hSlidesCandidates]
+hCandidates = []
+for photo in hPhotos:
+    hCandidates.append(slide('H', [photo]))
+
+hScores = [len(x.tags) for x in hCandidates]
 vScores = [len(x.tags) for x in vCandidates]
 
 slideshow = []
 
-if len(hSlidesCandidates) > 0:
-    maxHScore = max(hScores)
-else:
-    maxHScore = -1
+#print("H Candidates Bef:")
+#for hCand in hCandidates:
+#    print([x.photoID for x in hCand.photos])
+#print("V Candidates Bef:")
+#for vCand in vCandidates:
+#    print([x.photoID for x in vCand.photos])
 
+if len(hCandidates) > 0:
+    minHScore = min(hScores)
+else:
+    minHScore = -1
+    
 if len(vCandidates) > 0:
-    maxVScore = max(vScores)
+    minVScore = min(vScores)
 else:
-    maxVScore = -1
+    minVScore = -1
 
-if maxHScore > maxVScore:
-    popIdx = hScores.index(maxHScore)
-    slideshow.append(hSlidesCandidates.pop(popIdx))
+if (minVScore == -1) or (minVScore < minHScore):
+    popIdx = hScores.index(minHScore)
+    slideshow.append(hCandidates.pop(popIdx))
     hScores.pop(popIdx)
 else:
-    popIdx = vScores.index(maxVScore)
-    
+    popIdx = vScores.index(minVScore)    
     slideshow.append(vCandidates.pop(popIdx))
     vScores.pop(popIdx)
 
-while ((len(vCandidates) > 0) or (len(hSlidesCandidates) > 0)):
+#if (minHScore < minVScore) and (minHScore != -1):
+#    popIdx = hScores.index(minHScore)
+#    slideshow.append(hCandidates.pop(popIdx))
+#    hScores.pop(popIdx)
+#elif (minVScore < minHScore) and (minVScore != -1):
+#    popIdx = vScores.index(minVScore)    
+#    slideshow.append(vCandidates.pop(popIdx))
+#    vScores.pop(popIdx)
+
+#print("H Candidates Aft:")
+#for hCand in hCandidates:
+#    print([x.photoID for x in hCand.photos])
+#print("V Candidates Aft:")
+#for vCand in vCandidates:
+#    print([x.photoID for x in vCand.photos])
+
+allCandidates = vCandidates + hCandidates
+allScores = vScores + hScores
+
+#while ((len(vCandidates) > 0) or (len(hCandidates) > 0)):
+while (len(allCandidates) > 0):
     
-    print(len(vCandidates) + len(hSlidesCandidates))
+#    print("Slideshow")
+#    for slideIter in slideshow:
+#        print([x.photoID for x in slideIter.photos])
     
-    allCandidates = vCandidates + hSlidesCandidates
-    allScores = vScores + hScores
+    print(len(allCandidates))
+#    print("All candidates")
+#    for candidate in allCandidates:
+#        print([x.photoID for x in candidate.photos])
     
     allScores = np.array(allScores)
     
     bestIdx = -1
     bestScore = -1
     
-    for candidateIdx in allScores.argsort()[::-1]:
+    searchTagsLength = len(slideshow[-1].tags)
+    #for candidateIdx in allScores.argsort()[::-1]:
+    for candidateIdx in allScores.argsort():
+        
+        #if bestScore > allScores[candidateIdx] / 2:
+        if (allScores[candidateIdx] > searchTagsLength):
+            
+            if bestScore > -1:
+                break
+            else:
+                searchTagsLength = allScores[candidateIdx]
+        
         currScore = calcTransScores(slideshow[-1], allCandidates[candidateIdx])
         
         if currScore > bestScore:
             bestScore = currScore
             bestIdx = candidateIdx
-        
-        if bestScore > allScores[candidateIdx] / 2:
-            break
     
-    slideshow.append(allCandidates[bestIdx])
+    slideshow.append(allCandidates.pop(bestIdx))
     
     allScores = list(allScores)
-    if slideshow[-1].slideType == 'H':
-#        allScores.pop(bestIdx)
-        hScores.pop(bestIdx - len(vCandidates))
-#        allCandidates.pop(bestIdx)
-        hSlidesCandidates.pop(bestIdx - len(vCandidates))
-        
-    elif slideshow[-1].slideType == 'V':
-        
-        vScores.pop(bestIdx)
-        vCandidates.pop(bestIdx)
-
-output_slideshow('./' + fname + '.txt', slideshow)
-
+    allScores.pop(bestIdx)
+    
+output_slideshow('./' + fname + '_solution.txt', slideshow)
+print("Final Score: " + str(calcSlideshowScores(slideshow)))
 

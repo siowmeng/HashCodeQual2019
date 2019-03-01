@@ -34,8 +34,10 @@ class slide():
 def calcTransScores(slide1, slide2):
     
     numCommon = len(slide1.tags.intersection(slide2.tags))
-    numDiff1 = len(slide1.tags.difference(slide2.tags))
-    numDiff2 = len(slide2.tags.difference(slide1.tags))
+    #numDiff1 = len(slide1.tags.difference(slide2.tags))
+    numDiff1 = len(slide1.tags) - numCommon
+    #numDiff2 = len(slide2.tags.difference(slide1.tags))
+    numDiff2 = len(slide2.tags) - numCommon
     
     return min(numCommon, numDiff1, numDiff2)
 
@@ -76,12 +78,18 @@ def getVCombi(vPhotos):
     return vSlidesCandidates, vSlidesBestTags, vSlidesBestPairs
 
 def getVCombi2(vPhotos):
+    
+    if len(vPhotos) == 0:
+        return []
+    
     vCombi = combinations(range(len(vPhotos)), 2)
-    print("combi here -1")
-    vCandMatrix = np.zeros((len(vPhotos), len(vPhotos)))
+#    print(len(vPhotos))
+    
+    vCandMatrix = np.array([[None] * len(vPhotos)] * len(vPhotos))
     vMatrix = np.full((len(vPhotos), len(vPhotos)), -1)
-    print("combi here 0")
+    
     for idx1, idx2 in vCombi:
+#        print("(" + str(idx1) + ", " + str(idx2) + ")")
         currSlide = slide('V', [vPhotos[idx1], vPhotos[idx2]])
         
         if len(currSlide.tags) > vMatrix[idx1, idx2]:
@@ -90,20 +98,28 @@ def getVCombi2(vPhotos):
             vCandMatrix[idx1, idx2] = currSlide
             vCandMatrix[idx2, idx1] = currSlide    
     
-    print("combi here")
+    
     vCandidates = []
+    #print(vMatrix)
     maxVal = np.amax(vMatrix)
+    #print(maxVal)
     while maxVal > -1:
         
-        rowIdx, colIdx = np.where(vMatrix == maxVal)[0]
-        vCandidates.append(vCandMatrix[rowIdx, colIdx])
+#        print(vMatrix)
+        rowIdx, colIdx = np.where(vMatrix == maxVal)
+        vCandidates.append(vCandMatrix[rowIdx[0], colIdx[0]])
+#        print(len(vCandidates))
+#        print([x.photoID for x in vCandidates[-1].photos])
         
-        vMatrix[rowIdx, :] = -1
-        vMatrix[:, colIdx] = -1
-                
+        vMatrix[rowIdx[0], :] = -1
+        vMatrix[colIdx[0], :] = -1
+        vMatrix[:, rowIdx[0]] = -1
+        vMatrix[:, colIdx[0]] = -1
+#        print(rowIdx[0])
+#        print(colIdx[0])
+#        print(vMatrix)
         maxVal = np.amax(vMatrix)
-        print("combi here 2")
-    
+            
     return vCandidates
 
 def findCombi(listPhotos):
