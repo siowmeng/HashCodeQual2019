@@ -1,10 +1,16 @@
-# Part 3: Write results to output file
-noCacheServers = sum(np.sum(finalResults, axis = 1) > 0) # Number of cache servers used
-with open(filename.split('.')[0] + '.out', 'w') as fd:
-    fd.write(str(noCacheServers) + '\n')
-    for i in range(num_caches):
-        if sum(finalResults[i]) > 0:   
-            writeLine = str(i)
-        for vidCache in np.where(finalResults[i])[0]:
-            writeLine += (' ' + str(vidCache))
-        fd.write(writeLine + '\n')
+def output_slideshow(filename, slide_list):
+    """
+    returns: Output File given a list of slide class
+    """
+    """Writes an output file with the required format."""
+    with open(filename, 'w') as f:
+
+        f.write(f"{len(slide_list)}\n")
+
+        for slide in slide_list:
+            if slide.slideType == 'V':
+                V1, V2 = slide.photos
+                f.write(f"{V1.photoID} {V2.photoID}\n")
+            else:
+                H = slide.photos[0]
+                f.write(f"{H.photoID}\n")
