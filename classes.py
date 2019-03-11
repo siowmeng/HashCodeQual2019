@@ -17,6 +17,7 @@ class photo():
         self.photoID = photoID
         self.orient = orient
         self.tags = tags
+        self.tagsFScore = 0
 
 # Output Class: List of Slides
 class slide():

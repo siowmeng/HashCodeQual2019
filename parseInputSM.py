@@ -7,6 +7,7 @@ Created on Fri Mar  1 03:21:51 2019
 """
 
 from classes import photo
+from statistics import median
 #filepath = 'input/a_example.txt'
 
 def num_of_photos(filename):
@@ -20,6 +21,7 @@ def input_parser(filepath):
     i = 0
     hPhotos = []
     vPhotos = []
+    tagFreq = {}
     for line in lines:
         if i > 0:
             photo_info = line.split(' ')
@@ -27,11 +29,48 @@ def input_parser(filepath):
             tag_num = int(photo_info[1])
             tags = []
             for j in range(tag_num):
-                tags.append(photo_info[2+j].rstrip())
+                tagName = photo_info[2+j].rstrip()
+                if tagName in tagFreq:
+                    tagFreq[tagName] += 1
+                else:
+                    tagFreq[tagName] = 1
+                tags.append(tagName)
             photo_id = i - 1
             if orientation == 'H':
                 hPhotos.append(photo(photoID=photo_id,orient=orientation,tags = tags))
             elif orientation == 'V':
                 vPhotos.append(photo(photoID=photo_id,orient=orientation,tags = tags))
         i += 1
-    return hPhotos, vPhotos
+    
+    allFScores = []
+    hPhotosNumTags = []
+    hPhotosTagsFScores = []
+    for k in range(len(hPhotos)):
+        numTags = 0
+        tagsWSums = 0
+        
+        for tag in hPhotos[k].tags:
+            tagsWSums += tagFreq[tag]
+            numTags += 1
+        
+        hPhotos[k].tagsFScore = tagsWSums / numTags
+        allFScores.append(hPhotos[k].tagsFScore)
+        hPhotosNumTags.append(len(hPhotos[k].tags))
+        hPhotosTagsFScores.append(hPhotos[k].tagsFScore)
+    
+    vPhotosNumTags = []
+    vPhotosTagsFScores = []
+    for k in range(len(vPhotos)):
+        numTags = 0
+        tagsWSums = 0
+        
+        for tag in vPhotos[k].tags:
+            tagsWSums += tagFreq[tag]
+            numTags += 1
+        
+        vPhotos[k].tagsFScore = tagsWSums / numTags
+        allFScores.append(vPhotos[k].tagsFScore)
+        vPhotosNumTags.append(len(vPhotos[k].tags))
+        vPhotosTagsFScores.append(vPhotos[k].tagsFScore)
+    
+    return hPhotos, hPhotosNumTags, hPhotosTagsFScores, vPhotos, vPhotosNumTags, vPhotosTagsFScores, median(allFScores)
